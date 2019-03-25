@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--     
+    namespace：必须与对应的接口全类名一致  UserMapper.java  
+    id ：必须与对应接口的某个对应的方法名一致即必须要和UserMapper.java接口中的方法同名。  
+ -->
+ <mapper namespace="com.mapper.ServerMapper">
+    <!-- 注册 -->
+    <insert id="register" parameterType="java.util.HashMap">
+        insert into userdata (user_account,user_password) values (#{account},#{password})
+    </insert>
+    <!-- 登录 -->
+    <select id="login" parameterType="java.util.HashMap" resultType="User">
+        select * from userdata where user_account=#{account} and user_password=#{password}
+    </select>
+    <!-- 获取用户信息 -->
+    <select id="getInfo" parameterType="java.lang.String" resultType="com.pojo.User">
+        select * from userdata where user_account=#{account}
+    </select>
+    <!-- 修改用户信息 -->
+    <update id="upUser" parameterType="User">
+        update userdata set 
+        user_name=#{name},user_password=#{password},user_sex=#{sex},
+        user_location=#{user_location},user_type=#{user_type},employe_company=#{employe_company} where user_account=#{account}
+    </update>
+    <!-- 用户获取个人订单表 -->
+    <select id="getOrder" parameterType="String" resultType="Order">
+        select id,order_executor,order_user,order_item,order_st,order_stats,order_execution,order_ft from orderdata where order_user in (select user_name
+         from userdata where user_account=#{account})
+    </select>
+    <!-- 员工获取订单 -->
+    <select id="exeGetOrder" resultType="Order">
+      select id,order_executor,order_user,order_item,order_st,order_stats,order_execution,order_ft
+       from orderdata where order_stats='已审核' and order_execution='未受理'
+    </select>
+    <!-- 员工执行订单时，状态更改 -->
+    <update id="exeUpOrder" parameterType="HashMap">
+        update orderdata set order_executor=#{executor},order_execution=#{execution},order_ft=#{ft}
+         where orderdata.id=#{orderId}
+    </update>
+    <!-- 管理员查看待审核订单 -->
+    <select id="AdGetOrder" resultType="Order">
+       select id,order_executor,order_user,order_item,order_st,order_stats,order_execution,order_ft
+        from orderdata where order_stats='未审核'
+    </select>
+    <!-- 管理员审核订单修改状态 -->
+    <update id="AdupOrder" parameterType="int">
+       update orderdata set order_stats='已审核',order_execution='已受理' where orderdata.id=#{orderId}
+    </update>
+    <!-- 用户创建订单 -->
+    <insert id="UserInserOrder" parameterType="Order">
+      insert into orderdata (order_executor,order_user,order_item,order_st,order_stats,order_execution,
+      order_ft) values (#{order_executor},#{order_user},#{order_item},#{order_st},#{order_stats},
+      #{order_execution},#{order_ft})
+    </insert>
+    <!-- 查询用户订单是否已经创建 -->
+    <select id="OrderIsInser" parameterType="HashMap" resultType="Order">
+     select order_executor,order_user,order_item,order_st,order_stats,order_execution,order_ft
+      from orderdata where order_user=#{user} and order_st=#{st} and order_item=#{item} and order_stats='未审核'
+    </select>
+</mapper>
