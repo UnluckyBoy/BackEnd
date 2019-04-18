@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import EncryptionModel.Pwd3DESUtil;
+
 import com.pojo.User;
 import com.service.BackService;
 
@@ -23,6 +25,8 @@ import com.service.BackService;
 @Controller()
 @RequestMapping("/Controller/User")
 public class ServerController {
+	
+	private static String PASSWORD_EncryKEY = "EncryptionKey";
 	
 	@Autowired
 	private BackService backService;
@@ -39,7 +43,11 @@ public class ServerController {
 		Map<String,String> result_map=new HashMap<String, String>();
 		String response="true";
 		RegisterMap.put("account",account);
-		RegisterMap.put("password",password);
+		
+		//对密码加密
+		String encryPwd = Pwd3DESUtil.encode3Des(PASSWORD_EncryKEY, password);
+		
+		RegisterMap.put("password",encryPwd);
 		//System.out.println("map:"+RegisterMap);
 		if(backService.login(RegisterMap)==null){
 			System.out.println("用户未注册"+RegisterMap);
@@ -63,7 +71,9 @@ public class ServerController {
 		Map<String,String> result_map=new HashMap<String, String>();
 		String response="true";
 		session_map.put("account",account);
-		session_map.put("password",password);
+		
+		String encryPwd = Pwd3DESUtil.encode3Des(PASSWORD_EncryKEY, password);
+		session_map.put("password",encryPwd);
 		user=backService.login(session_map);
 		if(user==null){
 			System.out.println("登录失败"+session_map);
@@ -99,7 +109,9 @@ public class ServerController {
 		userMap.put("id",String.valueOf(user.getId()));
 		userMap.put("name",user.getName());
 		userMap.put("account",user.getAccount());
-		userMap.put("password",user.getPassword());
+		
+		//对密码进行解密
+		userMap.put("password",Pwd3DESUtil.decode3Des(PASSWORD_EncryKEY, user.getPassword()));
 		userMap.put("sex",user.getSex());
 		userMap.put("address",user.getUser_address());
 		userMap.put("type",String.valueOf(user.getUser_type()));
@@ -119,6 +131,7 @@ public class ServerController {
 	throws UnsupportedEncodingException{
 		
 		String nameKey=new String(name.getBytes("iso-8859-1"),"utf-8");//中文字符处理
+		String EnPwd=Pwd3DESUtil.encode3Des(PASSWORD_EncryKEY, password);//对请求密码加密匹配
 		String sexKey=new String(sex.getBytes("iso-8859-1"),"utf-8");
 		String addressKey=new String(address.getBytes("iso-8859-1"),"utf-8");
 		String response="true";
@@ -126,14 +139,12 @@ public class ServerController {
 		
 		user=backService.getInfo(account);
 		User NewUser=new User(user.getId(),(nameKey.equals("")?user.getName():nameKey),account,
-				(newpassword.equals("")?user.getPassword():newpassword),(sexKey.equals("")?user.getSex():sexKey),
-				(addressKey.equals("")?user.getUser_address():addressKey),user.getUser_type(),user.getEmpl_company());
+				(newpassword.equals("")?user.getPassword():Pwd3DESUtil.encode3Des(PASSWORD_EncryKEY, newpassword)),
+				(sexKey.equals("")?user.getSex():sexKey),(addressKey.equals("")?user.getUser_address():addressKey),
+				user.getUser_type(),user.getEmpl_company());
 		
-		/*System.out.println("访问URL中的数据:"+"\n账户:"+account+" 用户名:"+nameKey+
-				" 密码:"+password+" 新密码:"+newpassword+" 性别:"+sexKey+" 住址:"+addressKey);
-		System.out.println("NewUser中的数据:"+NewUser.toString());
-		System.out.println("user中的数据："+user.toString());*/
-		if(password.equals(user.getPassword())){
+		//校验用户原密码
+		if(EnPwd.equals(user.getPassword())){
 			if(backService.upUser(NewUser)>0){
 				UpuserMap.put("result", response);
 				return UpuserMap;
