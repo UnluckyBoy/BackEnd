@@ -82,4 +82,16 @@ public class BackServiceImpl implements BackService{
 	public int exeUpOrder(Map<String, String> map) {
 		return serverMapper.exeUpOrder(map);
 	}
+
+	@Override
+	public void DelOrder(int KeyId) {
+		// TODO Auto-generated method stub
+		serverMapper.DelOrder(KeyId);
+	}
+
+	@Override
+	public List SelCompany() {
+		// TODO Auto-generated method stub
+		return serverMapper.SelCompany();
+	}
 }

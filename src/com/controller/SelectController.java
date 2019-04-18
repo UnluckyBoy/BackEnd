@@ -58,4 +58,16 @@ public class SelectController {
 		orderMap.put("Order", orderList);
 		return orderMap;
 	}
+	
+	//用户查询配件来源公司
+	@RequestMapping("/userController/selectcompany")
+	@ResponseBody()
+	public Map SelectCompany(HttpServletRequest request,Model model){
+		
+		List<Object> companyList=new ArrayList<Object>();
+		Map companyMap=new HashMap();
+		companyList=backService.SelCompany();
+		companyMap.put("company", companyList);
+		return companyMap;
+	}
 }

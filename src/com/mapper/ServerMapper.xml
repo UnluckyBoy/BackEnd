@@ -60,4 +60,12 @@
      select order_executor,order_user,order_item,order_st,order_stats,order_execution,order_ft
       from orderdata where order_user=#{user} and order_st=#{st} and order_item=#{item} and order_stats='未审核'
     </select>
+    <!-- 用户删除未受理订单 -->
+    <delete id="DelOrder" parameterType="int">
+      delete from orderdata where orderdata.id=#{id} and orderdata.order_execution='未受理'
+    </delete>
+    <!-- 用户查询配件来源合作公司 -->
+    <select id="SelCompany" resultType="Company">
+      select companydata.id,companydata.name,companydata.adress,companydata.company_contact from companydata
+    </select>
 </mapper>

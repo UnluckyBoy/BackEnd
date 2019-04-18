@@ -21,4 +21,6 @@ public interface ServerMapper {
 	public void UserInserOrder(Order order);//用户创建订单
 	public List OrderIsInser(Map<String,String> map);//查询用户订单是否创建
 	public int exeUpOrder(Map<String,String> map);//工作人员执行订单
+	public void DelOrder(int KeyId);//用户删除未受理订单
+	public List SelCompany();//用户查询配件来源公司
 }

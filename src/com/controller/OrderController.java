@@ -97,4 +97,27 @@ public class OrderController {
 		}
 		return orderMap;
 	}
+	
+	//用户删除未受理订单
+	@RequestMapping("/userController/orderdel")
+	@ResponseBody()
+	public Map DelOrder(@RequestParam("account") String account,@RequestParam("id") int id,
+			HttpServletRequest request,Model model){
+		List<Object> orderReList=new ArrayList<Object>();
+		Map orderMap=new HashMap();
+		
+		backService.DelOrder(id);
+		orderReList=backService.getOrder(account);
+		orderMap.put("Order", orderReList);
+		/*int delCode=backService.DelOrder(id);
+		if(delCode!=0){
+			orderReList=backService.getOrder(account);
+			orderMap.put("Order", orderReList);
+			System.out.println("删除后刷新："+orderMap.toString());
+		}else{
+			
+		}*/
+		
+		return orderMap;
+	}
 }
